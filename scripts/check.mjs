@@ -2,8 +2,10 @@ import { readdir } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { checkRepository } from './check-repository.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
+checkRepository(root);
 async function sources(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = await Promise.all(entries.map(entry => {

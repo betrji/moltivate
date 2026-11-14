@@ -9,3 +9,7 @@ node_modules/
 *-keypair.json
 playwright-report/
 test-results/
+
+# Local checkouts and scratch worktrees are never project source.
+/.isolated/
+/.worktrees/
