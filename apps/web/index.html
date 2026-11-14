@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="./fonts.css">
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./editorial.css">
+  <link rel="stylesheet" href="./motion.css">
   <script type="module" src="./app.js"></script>
 </head>
 <body>
@@ -28,12 +29,13 @@
       <button class="nav-cta" data-get-app>Get Moltivated <span aria-hidden="true">↗</span></button>
     </nav>
   </header>
+  <club-peek></club-peek>
 
   <main id="main">
-    <section class="hero section-shell" aria-labelledby="hero-title">
+    <section class="hero hero-stack section-shell" aria-labelledby="hero-title">
       <div class="hero-copy">
         <p class="eyebrow"><span class="green-dot"></span> A LITTLE COMMITMENT. A STRONGER YOU.</p>
-        <h1 id="hero-title">Put your money<br>where your<br><em>muscles are.</em></h1>
+        <h1 id="hero-title"><span class="hero-line">Put your money</span><span class="hero-line">where your <em class="metal-type">muscles are.</em></span></h1>
         <p class="hero-description">The fitness app where friends put money behind their goals—and get stronger together.</p>
         <div class="hero-actions">
           <button class="store-button" data-get-app aria-label="App Store, coming soon. View app availability">
@@ -43,21 +45,14 @@
           <a class="text-button demo-link" href="#demo">Try the demo <span aria-hidden="true">↗</span></a>
         </div>
         <p class="platform-note">Made for iOS & Android. Built around your people.</p>
-        <div class="hero-note" aria-hidden="true">
-          <span>a little stronger,<br><span>together.</span></span>
-          <svg viewBox="0 0 130 64"><path d="M4 29c30-36 58 45 99 11M91 34l15 5-9 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <div class="hero-utility">
+          <a class="scroll-cue" href="#demo">Meet your next chapter <svg viewBox="0 0 18 22" fill="none" aria-hidden="true"><path d="M9 2v16m-5-5 5 5 5-5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
         </div>
-      </div>
-      <div class="hero-product" id="demo">
-        <div class="phone-sun" aria-hidden="true"></div>
-        <div class="round-stamp" aria-hidden="true"><span>YOUR NEXT</span><svg viewBox="0 0 36 36"><path d="M18 5v26M5 18h26M9 9l18 18M9 27 27 9" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg><span>CHAPTER</span></div>
-        <moltivate-demo></moltivate-demo>
-        <span class="phone-caption" aria-hidden="true">real effort.<br><i>real good energy.</i></span>
       </div>
     </section>
 
     <section class="sponsor-section section-shell" aria-labelledby="sponsor-title">
-      <div class="sponsor-heading"><p id="sponsor-title">BUILDING FOR THE HACKATHON SIDE TRACKS</p><button class="marquee-toggle" aria-label="Pause sponsor logos" aria-pressed="false"><span aria-hidden="true">Ⅱ</span></button></div>
+      <div class="sponsor-heading"><p id="sponsor-title">BUILDING FOR THE HACKATHON SIDE TRACKS</p></div>
       <div class="sponsor-viewport">
         <div class="sponsor-track">
           <div class="sponsor-group">
@@ -67,6 +62,26 @@
             <a class="sponsor-brand chert" href="#track-chert"><span class="brand-word"><img src="./assets/sponsors/chert-small.webp" width="31" height="31" alt="">Chert</span><small>Video & vision exploration</small></a>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="product-story" id="demo" aria-labelledby="product-title" data-chapter="0">
+      <div class="product-stage">
+        <div class="product-heading"><p>a little stronger, together.</p><h2 id="product-title">One crew. One promise. You show up.</h2></div>
+        <div class="product-body">
+          <div class="device-shadow" aria-hidden="true"></div>
+          <div class="device-wrap"><moltivate-demo scroll-story></moltivate-demo></div>
+          <div class="story-aside">
+            <div class="chapter-count"><strong data-chapter-number>01</strong><span>/ 03</span></div>
+            <h3 data-chapter-title>Find your people.</h3>
+            <p data-chapter-text>The hardest rep is getting out the door. Make a plan with the people who get you there.</p>
+            <div class="story-ticks" aria-hidden="true"><span class="active"></span><span></span><span></span></div>
+          </div>
+          <div class="commitment-slip" aria-hidden="true"><span class="slip-label" data-chapter-label>THE GROUP CHAT MADE IT</span><strong class="slip-value" data-chapter-value>The morning crew</strong><span class="slip-detail" data-chapter-detail>Two teams. Ten squats each.</span><span class="slip-signoff" data-chapter-signoff>see you at six.</span></div>
+          <span class="product-endnote" aria-hidden="true">real effort.<br>real good energy.</span>
+        </div>
+        <p class="story-prompt">Scroll through the story, or tap the phone and make it yours.</p>
+        <div class="scroll-track" aria-hidden="true"><span></span></div>
       </div>
     </section>
 
@@ -91,8 +106,8 @@
         </div>
         <figure class="crew-polaroid" data-image-slot="1">
           <span class="paper-tape" aria-hidden="true"></span>
-          <img src="./assets/photos/gym-crew-frederick-shaw.jpg" alt="Four gym friends taking a candid mirror photo after a workout" width="1200" height="800" loading="lazy">
-          <figcaption><span>better with your people.</span><small>PHOTO 01 · <a href="https://unsplash.com/photos/a-group-of-men-standing-next-to-each-other-in-a-gym-8_dlc8tOpcc" target="_blank" rel="noopener noreferrer">Frederick Shaw / Unsplash</a></small></figcaption>
+          <img src="./assets/photos/teletubbies-gym-crew.jpg" alt="The four Teletubbies lifting weights together in a gym inside their grassy home." width="1086" height="1448" loading="lazy" decoding="async">
+          <figcaption><span>better with your people.</span></figcaption>
         </figure>
         <span class="bread-sticker" aria-hidden="true">LET'S GET<br><em>THIS BREAD.</em><span>EST. WHENEVER YOU START.</span></span>
       </div>

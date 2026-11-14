@@ -81,23 +81,6 @@ button:focus-visible, input:focus-visible, select:focus-visible {
   line-height: 1.5;
 }
 .update-meta .table-caption { padding: 0; margin: 0; }
-.updates-control {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  flex-shrink: 0;
-  border: 1px solid #34363d;
-  border-radius: 5px;
-  background: #17181c;
-  color: #c4c7cf;
-  font-size: 10px;
-  line-height: 1.4;
-  font-weight: 500;
-  padding: 5px 8px;
-}
-.updates-control:hover { background: #25272c; border-color: #626672; color: #fff; }
-.updates-control[aria-pressed=true] { background: #25272c; color: #f1f2f4; }
 thead { background: #101114; }
 th { color: #9599a3; font-size: 10px; padding: 12px; letter-spacing: .055em; }
 th:first-child { width: 55px; padding-left: 24px; }
@@ -192,8 +175,7 @@ tr.club-row:hover { background: #17181c; }
   .select-wrap:after { top: 6px; right: 8px; }
   .table-caption { padding: 0 13px 13px; font-size: 9px; }
   .update-meta { padding: 0 13px 13px; gap: 8px; font-size: 9px; }
-  .updates-control { font-size: 9px; padding: 5px 7px; }
-  th { padding: 11px 6px; font-size: 8px; letter-spacing: .03em; }
+    th { padding: 11px 6px; font-size: 8px; letter-spacing: .03em; }
   th:first-child { width: 29px; padding-left: 13px; }
   th:nth-child(2) { width: 43%; }
   th:nth-child(3) { width: 18%; }

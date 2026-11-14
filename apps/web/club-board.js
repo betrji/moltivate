@@ -38,7 +38,7 @@ class ClubBoard extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this.filters = { query: '', crew: 'all', period: 'week', sort: 'progress' };
     this.feedTick = 0;
-    this.updatesPaused = false;
+    this.externalVisible = false;
     this.inView = false;
     // Integer thousandths of SOL are display fixtures, never wallet balances.
     this.displayUnits = Object.fromEntries(['week', 'month'].map(period => [period,
@@ -65,7 +65,7 @@ class ClubBoard extends HTMLElement {
                 <label class="select-wrap"><span class="screen-reader">Leaderboard period</span><select name="period"><option value="week">This week</option><option value="month">This month</option></select></label>
               </div>
             </div>
-            <div class="update-meta"><p class="table-caption">Latest challenge progress · <span class="feed-label">demo SOL refreshes every 4.5s</span></p><button class="updates-control" aria-pressed="false">Pause updates <span aria-hidden="true">Ⅱ</span></button></div>
+            <div class="update-meta"><p class="table-caption">Latest challenge progress · <span class="feed-label">demo SOL refreshes every 4.5s</span></p></div>
             <div class="results"></div>
             <div class="board-bottom"><span class="rank-count" role="status" aria-live="polite"></span><button class="reset">Reset filters ↗</button></div>
           </div>
@@ -93,10 +93,6 @@ class ClubBoard extends HTMLElement {
     this.shadowRoot.addEventListener('click', (event) => {
       const filter = event.target.closest('[data-filter]');
       const team = event.target.closest('[data-team]');
-      if (event.target.closest('.updates-control')) {
-        this.updatesPaused = !this.updatesPaused;
-        this.syncUpdates();
-      }
       if (filter) { this.filters.crew = filter.dataset.filter; this.updateRows(); }
       if (team) this.showTeam(team.dataset.team);
       if (event.target.closest('.reset, [data-reset]')) this.reset();
@@ -139,16 +135,22 @@ class ClubBoard extends HTMLElement {
   syncUpdates() {
     clearInterval(this.updateTimer);
     this.updateTimer = null;
-    const button = this.shadowRoot.querySelector('.updates-control');
-    if (!button) return;
-    button.setAttribute('aria-pressed', String(this.updatesPaused));
-    button.innerHTML = this.updatesPaused ? 'Resume updates <span aria-hidden="true">▷</span>' : 'Pause updates <span aria-hidden="true">Ⅱ</span>';
-    this.shadowRoot.querySelector('.feed-label').textContent = this.updatesPaused ? 'demo feed paused' : 'demo SOL refreshes every 4.5s';
-    if (!this.isConnected || this.updatesPaused || !this.inView || document.hidden || this.shadowRoot.querySelector('dialog').open || !this.shadowRoot.querySelector('rolling-amount')) {
+    if (!this.isConnected || (!this.inView && !this.externalVisible) || document.hidden || this.shadowRoot.querySelector('dialog').open) {
       this.shadowRoot.querySelectorAll('rolling-amount').forEach(amount => amount.settle?.());
       return;
     }
     this.updateTimer = setInterval(() => this.advanceFeed(), 4500);
+  }
+
+  setExternalVisible(visible) {
+    if (this.externalVisible === visible) return;
+    this.externalVisible = visible;
+    this.syncUpdates();
+  }
+
+  weeklySnapshot() {
+    return clubs.map(club => ({...club, value:this.displayUnits.week[club.id] / 1000}))
+      .sort((a,b) => b.value - a.value);
   }
 
   advanceFeed() {
@@ -183,6 +185,7 @@ class ClubBoard extends HTMLElement {
     visibleRows.forEach((row, index) => {
       if (tbody.children[index] !== row) tbody.insertBefore(row, tbody.children[index] || null);
     });
+    this.dispatchEvent(new CustomEvent('moltivate:club-feed', {detail:this.weeklySnapshot()}));
   }
 
   progress(club) {

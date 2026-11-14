@@ -1,5 +1,7 @@
 import './phone-demo.js';
 import './club-board.js';
+import './club-peek.js';
+import './motion.js';
 
 const menuButton = document.querySelector('.menu-toggle');
 const nav = document.querySelector('#main-nav');
@@ -36,7 +38,7 @@ dialog.addEventListener('click', event => {
 });
 document.querySelector('#dialog-demo').addEventListener('click', () => {
   dialog.close();
-  demo.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block:'center'});
+  demo.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block:'start'});
   const phone = document.querySelector('moltivate-demo');
   phone?.focusDemo?.();
 });
@@ -47,19 +49,11 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // Duplicate decorative sponsor marks for a seamless loop; only the first group is focusable.
-const sponsorSection = document.querySelector('.sponsor-section');
 const sponsorTrack = document.querySelector('.sponsor-track');
 const sponsorCopy = sponsorTrack.querySelector('.sponsor-group').cloneNode(true);
 sponsorCopy.setAttribute('aria-hidden', 'true');
 sponsorCopy.querySelectorAll('a').forEach(link => link.tabIndex = -1);
 sponsorTrack.append(sponsorCopy);
-const sponsorToggle = document.querySelector('.marquee-toggle');
-sponsorToggle.addEventListener('click', () => {
-  const paused = sponsorSection.classList.toggle('paused');
-  sponsorToggle.setAttribute('aria-pressed', String(paused));
-  sponsorToggle.setAttribute('aria-label', paused ? 'Play sponsor logos' : 'Pause sponsor logos');
-  sponsorToggle.querySelector('span').textContent = paused ? '▷' : 'Ⅱ';
-});
 document.addEventListener('visibilitychange', () => {
   sponsorTrack.style.animationPlayState = document.hidden ? 'paused' : '';
 });

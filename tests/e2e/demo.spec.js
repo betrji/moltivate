@@ -56,7 +56,6 @@ test('phone demo completes join, workout, receipt, and replay', async ({ page })
 
 test('leaderboard filters, sorting, periods, and details stay consistent', async ({ page }) => {
   const board = page.locator('club-board');
-  await board.getByRole('button', { name: 'Pause updates' }).click();
   const search = board.getByRole('searchbox', { name: 'Search teams' });
   await search.fill('early');
   await expect(board.locator('tbody tr')).toHaveCount(1);
@@ -81,7 +80,7 @@ test('leaderboard filters, sorting, periods, and details stay consistent', async
 
 test.describe('repeating SOL feed', () => {
   test.use({ reducedMotion: 'no-preference' });
-  test('rolls, settles exactly, repeats, and respects pause', async ({ page }, testInfo) => {
+  test('rolls, settles exactly, repeats, and holds steady in a details dialog', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== 'desktop', 'Animation lifecycle needs one browser; layouts are tested above.');
     const board = page.locator('club-board');
     await board.scrollIntoViewIfNeeded();
@@ -91,14 +90,14 @@ test.describe('repeating SOL feed', () => {
     await expect(amount).toHaveAttribute('data-rolling', 'false');
     expect(await amount.locator('.amount').textContent()).toBe(firstValue);
     await expect.poll(() => amount.getAttribute('data-value')).not.toBe(firstValue);
-    await board.getByRole('button', { name: 'Pause updates' }).click();
+    await board.getByRole('button', { name: 'View The Early Birds demo details' }).click();
     const pausedValue = await amount.getAttribute('data-value');
     await expect(amount).toHaveAttribute('data-rolling', 'false');
-    // Observe a complete refresh interval; this catches a timer that keeps running while paused.
+    // Details remain a stable snapshot across a complete refresh interval.
     await page.waitForTimeout(4_700);
     await expect(amount).toHaveAttribute('data-value', pausedValue);
     expect(await amount.locator('.amount').textContent()).toBe(pausedValue);
-    await board.getByRole('button', { name: 'Resume updates' }).click();
+    await page.keyboard.press('Escape');
     await expect.poll(() => amount.getAttribute('data-value')).not.toBe(pausedValue);
   });
 });

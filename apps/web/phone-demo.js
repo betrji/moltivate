@@ -35,6 +35,33 @@ const css = `
 @media(max-width:360px){:host{width:290px}.phone{height:600px}.view{padding:0 15px}.view h3{font-size:26px;margin-bottom:12px}.challenge{padding:14px}.selectors{margin-inline:-3px}.selectors button{font-size:9px;padding:8px 7px}}
 `;
 
+const productCss = `
+.tab-number{display:none}
+:host([scroll-story]) .phone{height:650px;transform:perspective(1100px) rotateX(var(--phone-pitch,0deg)) rotateY(var(--phone-yaw,0deg)) rotateZ(var(--phone-roll,0deg));transform-origin:50% 45%;transition:transform .28s cubic-bezier(.2,.7,.2,1);box-shadow:0 34px 45px -25px #173e2c48,4px 2px 0 -1px #69715f,inset 0 0 0 1px #969d8b}
+:host([scroll-story]) .screen:after{content:'';position:absolute;inset:0;pointer-events:none;z-index:6;background:linear-gradient(115deg,transparent 32%,#ffffff20 45%,#ffffff04 47%,transparent 58%);background-size:180% 100%;background-position:var(--glass-position,50%) 0;border-radius:39px}
+:host([scroll-story]) .selectors{margin:0 -53px 24px;gap:0;border-bottom:1px solid #cbd3c1;justify-content:space-between}
+:host([scroll-story]) .selectors button{position:relative;border:0;border-radius:0;padding:12px 14px 15px;font-size:11px;color:#737f6c;background:transparent;transition:color .2s}
+:host([scroll-story]) .selectors button:after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--green,#173e2c);transform:scaleX(0);transform-origin:left;transition:transform .25s}
+:host([scroll-story]) .selectors button[aria-selected=true]{color:#193e2e;background:transparent;font-weight:650}
+:host([scroll-story]) .selectors button[aria-selected=true]:after{transform:scaleX(1)}
+:host([scroll-story]) .selectors button:hover{color:#b34d2d;background:transparent}
+:host([scroll-story]) .tab-number{display:inline-block;font:8px ui-monospace,monospace;margin-right:7px;opacity:.65}
+:host([scroll-story]) .tour-bottom{margin-top:18px;gap:15px}
+:host([scroll-story]) .tour-control{font-size:9px;min-height:28px}
+:host([scroll-story]) .demo-caption{font-size:9px;margin-top:6px}
+:host([scroll-story]) .view{animation:screen-enter .32s ease-out both}
+:host([scroll-story]) .reward .trophy{animation:trophy-enter .6s cubic-bezier(.2,.8,.2,1.3) both}
+.main-action:active{transform:translateY(1px)}
+@keyframes screen-enter{from{opacity:.35;translate:0 8px}to{opacity:1;translate:0 0}}
+@keyframes trophy-enter{from{scale:.7;rotate:-20deg}to{scale:1;rotate:0deg}}
+:host([effects-off]) .phone{transform:none;transition:none}
+:host([effects-off]) *,:host([effects-off]) *:after{animation:none!important;transition:none!important}
+@media(min-width:901px) and (max-height:880px){:host([scroll-story]) .phone{height:590px}:host([scroll-story]) .selectors{margin-bottom:20px}}
+@media(max-width:650px){:host([scroll-story]) .phone{height:620px}:host([scroll-story]) .selectors{margin:0 0 22px}:host([scroll-story]) .selectors button{font-size:10px;padding:12px 9px}:host([scroll-story]) .tab-number{font-size:7px;margin-right:5px}}
+@media(max-width:360px){:host([scroll-story]) .phone{height:600px}:host([scroll-story]) .selectors button{font-size:9px;padding:12px 7px}}
+@media(prefers-reduced-motion:reduce){:host([scroll-story]) .phone{transform:none;transition:none}*{animation:none!important;transition:none!important}}
+`;
+
 class MoltivateDemo extends HTMLElement {
   constructor() {
     super();
@@ -50,19 +77,47 @@ class MoltivateDemo extends HTMLElement {
     this.repTimer = null;
     this.boundClick = this.onClick.bind(this);
     this.boundKey = this.onKey.bind(this);
+    this.storyLayout = false;
+    this.visible = false;
+    this.motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    this.boundMotion = () => {
+      if (this.motionQuery.matches) { this.pauseTour(); this.render(); }
+    };
+    this.boundVisibility = () => this.scheduleTour();
   }
 
   connectedCallback() {
     this.shadowRoot.addEventListener('click', this.boundClick);
     this.shadowRoot.addEventListener('keydown', this.boundKey);
     this.render();
-    this.scheduleTour();
+    this.motionQuery.addEventListener('change', this.boundMotion);
+    document.addEventListener('visibilitychange', this.boundVisibility);
+    this.visibilityObserver = new IntersectionObserver(([entry]) => {
+      this.visible = entry.isIntersecting;
+      this.scheduleTour();
+    }, {threshold:.1});
+    this.visibilityObserver.observe(this);
   }
 
   disconnectedCallback() {
     this.shadowRoot.removeEventListener('click', this.boundClick);
     this.shadowRoot.removeEventListener('keydown', this.boundKey);
     this.clearTimers();
+    this.visibilityObserver?.disconnect();
+    this.motionQuery.removeEventListener('change', this.boundMotion);
+    document.removeEventListener('visibilitychange', this.boundVisibility);
+  }
+
+  setStoryLayout(active) {
+    if (this.storyLayout === active) return;
+    this.storyLayout = active;
+    this.render();
+    this.scheduleTour();
+  }
+
+  setStoryStage(stage) {
+    if (!this.storyLayout || !this.playing || this.overlay || this.counting) return;
+    if (stage !== this.stage) this.changeStage(stage);
   }
 
   focusDemo() {
@@ -79,7 +134,7 @@ class MoltivateDemo extends HTMLElement {
 
   scheduleTour() {
     clearTimeout(this.autoTimer);
-    if (!this.playing || !this.isConnected) return;
+    if (!this.playing || !this.isConnected || !this.visible || document.hidden || this.storyLayout) return;
     this.autoTimer = setTimeout(() => {
       this.changeStage((this.stage + 1) % 3);
       this.scheduleTour();
@@ -154,7 +209,7 @@ class MoltivateDemo extends HTMLElement {
       this.reps = 0;
       this.stage = 0;
       this.overlay = null;
-      this.playing = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      this.playing = !this.storyLayout && !this.motionQuery.matches;
       this.render('replay');
       this.scheduleTour();
     } else if (action === 'rules') {
@@ -273,7 +328,11 @@ class MoltivateDemo extends HTMLElement {
 
   render(focusAction = null) {
     const views = [this.crewView(), this.workoutView(), this.progressView()];
-    this.shadowRoot.innerHTML = `<style>${css}</style>
+    const selectors = `<div class="selectors" role="tablist" aria-label="Explore the app demo">${['Your crew', 'Your workout', 'Your progress'].map((label, i) => `<button id="tab-${i}" data-action="tab-${i}" data-stage="${i}" role="tab" aria-controls="demo-view" aria-selected="${this.stage === i}" tabindex="${this.stage === i ? '0' : '-1'}"><span class="tab-number" aria-hidden="true">0${i + 1}</span>${label}</button>`).join('')}</div>`;
+    const controlLabel = this.storyLayout ? 'Follow scroll tour' : 'Play automatic demo';
+    const controlText = this.storyLayout ? 'Follow scroll' : 'Play tour';
+    this.shadowRoot.innerHTML = `<style>${css}${productCss}</style>
+      ${this.hasAttribute('scroll-story') ? selectors : ''}
       <div class="phone"><div class="screen">
         <div class="status" aria-hidden="true"><span>9:41</span><span class="island"></span><span class="status-icons"><span class="signal"><i></i><i></i><i></i><i></i></span><svg width="12" height="10" viewBox="0 0 16 12" fill="none"><path d="M1 3a11 11 0 0 1 14 0M4 6a6 6 0 0 1 8 0m-5 3a2 2 0 0 1 2 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><i class="battery"></i></span></div>
         <div class="app-top"><div class="wordmark"><svg width="27" height="27" viewBox="0 0 48 48" aria-hidden="true" focusable="false"><rect width="48" height="48" rx="12" fill="#173e2c"/><g transform="translate(6 7) scale(.85)"><path d="M8 26V15a4 4 0 0 1 8 0v8l8-11a4.5 4.5 0 0 1 8 3v11" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="31" cy="5" r="3" fill="#e66b3d"/></g></svg>moltivate</div><span class="you" aria-label="Demo profile">YOU</span></div>
@@ -281,13 +340,14 @@ class MoltivateDemo extends HTMLElement {
         <nav class="bottom-nav" aria-label="Demo screens">${['Crew', 'Workout', 'Progress'].map((label, i) => `<button class="${this.stage === i ? 'active' : ''}" data-stage="${i}" aria-label="Show ${label.toLowerCase()} demo" ${this.stage === i ? 'aria-current="page"' : ''}>${icon(['people', 'activity', 'trophy'][i], 17)}${label}</button>`).join('')}</nav>
         <span class="homebar" aria-hidden="true"></span>${this.overlayView()}
       </div></div>
-      <div class="selectors" role="tablist" aria-label="Explore the app demo">${['Your crew', 'Your workout', 'Your progress'].map((label, i) => `<button id="tab-${i}" data-action="tab-${i}" data-stage="${i}" role="tab" aria-controls="demo-view" aria-selected="${this.stage === i}" tabindex="${this.stage === i ? '0' : '-1'}">${label}</button>`).join('')}</div>
-      <div class="tour-bottom"><button class="tour-control" data-action="toggle" aria-label="${this.playing ? 'Pause' : 'Play'} automatic demo">${icon(this.playing ? 'pause' : 'play', 12)}${this.playing ? 'Pause tour' : 'Play tour'}</button><button class="tour-control" data-action="replay" aria-label="Restart app demo">${icon('replay', 11)}Replay</button></div>
+      ${this.hasAttribute('scroll-story') ? '' : selectors}
+      <div class="tour-bottom">${this.playing ? '' : `<button class="tour-control" data-action="toggle" aria-label="${controlLabel}">${icon('play', 12)}${controlText}</button>`}<button class="tour-control" data-action="replay" aria-label="Restart app demo">${icon('replay', 11)}Replay</button></div>
       <p class="demo-caption">Interactive preview · sample data</p>`;
     if (this.overlay) {
       for (const el of this.shadowRoot.querySelectorAll('.view,.bottom-nav,.selectors,.tour-bottom')) el.inert = true;
     }
     if (focusAction) this.shadowRoot.querySelector(`[data-action="${focusAction}"]`)?.focus({ preventScroll: true });
+    this.dispatchEvent(new CustomEvent('moltivate:demo-state', {bubbles:true,detail:{stage:this.stage,playing:this.playing}}));
   }
 }
 
