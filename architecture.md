@@ -1,6 +1,6 @@
 # Moltivate architecture
 
-> Updated 14 November 2026. The static browser frontend described below is implemented. The native app, backend, verification service, database integration, and Solana program remain proposed implementation targets. The scoring and payout example is a proposal to confirm before contract implementation.
+> Updated 14 November 2026. The static browser frontend described below is implemented. The native app, verification service, and Solana program remain proposed implementation targets. A local backend foundation exists (`services/api/`, `supabase/migrations/`): off-chain challenge drafts, team membership, workout-session submission, and scoreboard progress, runnable locally against SQLite or Postgres. It is not deployed, has no wallet authentication or authorization, and talks to no object storage, verification worker, or Solana program — see `services/api/README.md` for exact scope and gaps. The scoring and payout example is a proposal to confirm before contract implementation.
 
 Moltivate turns exercise commitments into a social competition: join a team, commit a deposit, record a workout, and see the challenge settle. The mobile experience leads with self-improvement and belonging. The hackathon positioning is **Entertainment**; the planned end-to-end demonstration will use **Solana devnet and test SOL**.
 
@@ -66,16 +66,17 @@ Arrows show communication or data reads, not custody transfers. Deposits go from
 | Settlement worker | Freeze verified results, build and submit authorized result transactions, reconcile retries | Has the result-authority key; cannot replace wallet authorization for deposits or claims |
 | Anchor program | Challenge rules, roster, escrow, result acceptance, payout calculation, claims and refunds | Checks signer, accounts, deadlines, states and conservation of funds |
 
-Proposed repository layout for the first scaffold (these directories do not exist yet):
+Proposed repository layout for the first scaffold (paths marked *exists* have a local foundation; the rest remain proposed):
 
 | Path | Contents |
 | --- | --- |
 | `apps/mobile/` | Expo application and platform wallet adapters |
-| `services/api/` | FastAPI routes, auth, records and job producers |
+| `services/api/` *(exists, partial)* | FastAPI routes for draft challenges, team membership, session submission, and scoreboard progress. No auth, escrow, or verification worker yet |
 | `services/verifier/` | MediaPipe processing and exercise counters |
 | `services/settlement/` | TypeScript chain client, result submission and reconciliation |
 | `programs/moltivate/` | Anchor program and contract tests |
-| `packages/contracts/` | Generated IDL, shared client schemas and versioned rule definitions |
+| `packages/contracts/` *(exists, partial)* | Generated workout-session JSON Schema today; IDL and other shared client schemas remain proposed |
+| `supabase/migrations/` *(exists, partial)* | `users`, `challenges`, `teams`, `team_members`, `workout_sessions` only |
 | `infra/` | Docker configuration, environment examples and deployment notes |
 
 ## 2. Mobile and SDK decisions

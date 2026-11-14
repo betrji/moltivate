@@ -10,7 +10,7 @@ Moltivate is a mobile fitness competition app where friends form teams, put mone
 
 The complete demo source lives in `apps/web/`. The private demo requires ChatGPT sign-in; GitHub Actions produces tested build artifacts, with optional GitHub Pages deployment when a public host is selected.
 
-> Status: an interactive browser frontend is implemented in `apps/web/`. It introduces Moltivate and previews the planned mobile experience with sample data. The native mobile app, backend, verification worker, and smart contract have not been implemented or deployed. A future end-to-end blockchain demo will use Solana devnet and test SOL only.
+> Status: an interactive browser frontend is implemented in `apps/web/`. It introduces Moltivate and previews the planned mobile experience with sample data. A local backend foundation (`services/api/`) runs draft challenges, team membership, workout-session submission, and scoreboard progress for development only — it is not deployed, has no wallet authentication, and is not connected to the frontend above. The native mobile app, verification worker, and smart contract have not been implemented or deployed. A future end-to-end blockchain demo will use Solana devnet and test SOL only.
 
 ## Current frontend
 

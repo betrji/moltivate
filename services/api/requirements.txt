@@ -1,0 +1,9 @@
+# Minor-version ranges, not exact pins: this sandbox has no verified network
+# access to lock exact resolved versions. Tighten to exact versions (and add
+# a committed `pip freeze` lockfile) the first time this installs in CI.
+fastapi>=0.115,<0.120
+uvicorn[standard]>=0.34,<0.35
+sqlalchemy>=2.0,<2.1
+pydantic>=2.9,<3
+httpx>=0.27,<0.29
+pytest>=8.3,<9
