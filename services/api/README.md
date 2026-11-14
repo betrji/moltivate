@@ -32,6 +32,12 @@ confirmed deposit, or a verified/oracle-signed result.
   `Idempotency-Key` header, unique per `team_member_id`. Replaying the same
   key with the same payload returns the original session (idempotent);
   replaying it with a different payload returns `409`.
+- **Numeric bounds and lamport transport**: `target_reps`, `team_size`, and
+  `reps` are bounded to fit a Postgres `integer` column (0–2³¹-1); a larger
+  value is a `422`, not a database error. `stake_lamports` is bounded to fit
+  the `bigint` column (0–2⁶³-1) and is transported as a decimal string (both
+  in requests and responses) rather than a JSON number, since JavaScript's
+  `Number` can't exactly represent integers past 2⁵³-1.
 
 ## Routes
 
@@ -41,7 +47,7 @@ confirmed deposit, or a verified/oracle-signed result.
 | `POST /users` | **Dev-only** placeholder identity creation — not wallet auth (see Known gaps) |
 | `POST /challenges`, `GET /challenges/{id}` | Create/read a draft challenge |
 | `POST /challenges/{id}/teams` | Create a team inside a challenge |
-| `POST /teams/{id}/members` | Join a team (enforces one team per challenge per user, and team size) |
+| `POST /teams/{id}/members` | Join a team (enforces one team per challenge per user, and team size; the capacity check is concurrency-safe against overlapping joins) |
 | `POST /team-members/{id}/sessions` | Submit a workout session (needs `Idempotency-Key` header) |
 | `GET /challenges/{id}/scoreboard` | Per-team accepted reps (capped at `target_reps`) and completer counts |
 

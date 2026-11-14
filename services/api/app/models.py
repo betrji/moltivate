@@ -8,6 +8,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    TypeDecorator,
     Uuid,
     UniqueConstraint,
 )
@@ -16,6 +17,34 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+class UTCDateTime(TypeDecorator):
+    """A `DateTime(timezone=True)` that always round-trips with a UTC offset.
+
+    SQLite has no timezone-aware datetime storage: a tz-aware value written
+    through the plain SQLAlchemy type comes back naive, so a serialized
+    response silently loses its UTC offset (clients could read it as local
+    time). Normalize to UTC on the way in and reattach tzinfo on the way out,
+    on every backend, so stored/returned timestamps are never ambiguous.
+    """
+
+    impl = DateTime(timezone=True)
+    cache_ok = True
+
+    def process_bind_param(self, value: datetime | None, dialect: object) -> datetime | None:
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        return value.astimezone(timezone.utc)
+
+    def process_result_value(self, value: datetime | None, dialect: object) -> datetime | None:
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value.astimezone(timezone.utc)
 
 
 class Base(DeclarativeBase):
@@ -28,7 +57,7 @@ class User(Base):
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     display_name: Mapped[str] = mapped_column(String(80), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=_utcnow, nullable=False)
 
 
 class Challenge(Base):
@@ -50,7 +79,7 @@ class Challenge(Base):
     team_size: Mapped[int] = mapped_column(Integer, nullable=False)
     stake_lamports: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
     status: Mapped[str] = mapped_column(String(10), nullable=False, default="draft")
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=_utcnow, nullable=False)
 
     teams: Mapped[list["Team"]] = relationship(back_populates="challenge", cascade="all, delete-orphan")
 
@@ -62,7 +91,7 @@ class Team(Base):
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     challenge_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("challenges.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(60), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=_utcnow, nullable=False)
 
     challenge: Mapped[Challenge] = relationship(back_populates="teams")
     members: Mapped[list["TeamMember"]] = relationship(back_populates="team", cascade="all, delete-orphan")
@@ -83,7 +112,7 @@ class TeamMember(Base):
     team_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("teams.id"), nullable=False)
     challenge_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("challenges.id"), nullable=False)
     user_id: Mapped[uuid.UUID] = mapped_column(Uuid, ForeignKey("users.id"), nullable=False)
-    joined_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    joined_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=_utcnow, nullable=False)
 
     team: Mapped[Team] = relationship(back_populates="members")
     sessions: Mapped[list["WorkoutSession"]] = relationship(back_populates="team_member", cascade="all, delete-orphan")
@@ -108,6 +137,6 @@ class WorkoutSession(Base):
     liveness_result: Mapped[str] = mapped_column(String(10), nullable=False)
     status: Mapped[str] = mapped_column(String(10), nullable=False)
     idempotency_key: Mapped[str] = mapped_column(String(128), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime(), default=_utcnow, nullable=False)
 
     team_member: Mapped[TeamMember] = relationship(back_populates="sessions")

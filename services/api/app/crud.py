@@ -3,8 +3,9 @@ HTTP responses; nothing here knows about FastAPI.
 """
 
 import uuid
+from datetime import datetime, timezone
 
-from sqlalchemy import func, select
+from sqlalchemy import func, insert, literal, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -79,7 +80,13 @@ def get_team(db: Session, team_id: uuid.UUID) -> models.Team:
 
 
 def join_team(db: Session, team_id: uuid.UUID, data: schemas.TeamMemberCreate) -> models.TeamMember:
-    team = get_team(db, team_id)
+    # Lock the team row so two overlapping joins can't both read "room left"
+    # before either inserts (with_for_update is a no-op on SQLite, where a
+    # concurrent writer instead blocks on the INSERT statement below, since
+    # SQLite only ever allows one writer at a time).
+    team = db.scalar(select(models.Team).where(models.Team.id == team_id).with_for_update())
+    if team is None:
+        raise NotFoundError(f"team {team_id} not found")
     get_user(db, data.user_id)
     challenge = get_challenge(db, team.challenge_id)
 
@@ -92,21 +99,35 @@ def join_team(db: Session, team_id: uuid.UUID, data: schemas.TeamMemberCreate) -
     if existing_in_challenge is not None:
         raise ConflictError("user already belongs to a team in this challenge")
 
-    current_size = db.scalar(
-        select(func.count()).select_from(models.TeamMember).where(models.TeamMember.team_id == team_id)
+    member_id = uuid.uuid4()
+    joined_at = datetime.now(timezone.utc)
+    # A single statement that only inserts if the count-under-cap check still
+    # holds: the count subquery and the write happen atomically, so a second
+    # overlapping join can never see stale room left from before the first
+    # join's insert landed.
+    current_size = select(func.count()).select_from(models.TeamMember).where(
+        models.TeamMember.team_id == team_id
+    ).scalar_subquery()
+    insert_stmt = insert(models.TeamMember).from_select(
+        ["id", "team_id", "challenge_id", "user_id", "joined_at"],
+        select(
+            literal(member_id),
+            literal(team_id),
+            literal(team.challenge_id),
+            literal(data.user_id),
+            literal(joined_at),
+        ).where(current_size < challenge.team_size),
     )
-    if current_size is not None and current_size >= challenge.team_size:
-        raise ConflictError(f"team '{team.name}' already has {challenge.team_size} members")
-
-    member = models.TeamMember(team_id=team_id, challenge_id=team.challenge_id, user_id=data.user_id)
-    db.add(member)
     try:
-        db.commit()
+        result = db.execute(insert_stmt)
     except IntegrityError as exc:
         db.rollback()
         raise ConflictError("user already belongs to a team in this challenge") from exc
-    db.refresh(member)
-    return member
+    if result.rowcount == 0:
+        db.rollback()
+        raise ConflictError(f"team '{team.name}' already has {challenge.team_size} members")
+    db.commit()
+    return get_team_member(db, member_id)
 
 
 def get_team_member(db: Session, team_member_id: uuid.UUID) -> models.TeamMember:

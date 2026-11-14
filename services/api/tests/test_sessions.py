@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 import pytest
 
 
@@ -66,3 +68,24 @@ def test_missing_idempotency_key_is_rejected(client, team_member):
 def test_session_for_unknown_team_member_is_404(client):
     response = _submit(client, "00000000-0000-0000-0000-000000000000", "key-1")
     assert response.status_code == 404
+
+
+def test_reps_above_int32_is_rejected(client, team_member):
+    # Regression test: a Postgres "integer" column can't hold this value;
+    # it used to reach the database and raise an uncaught OverflowError/500
+    # on SQLite instead of a clean validation error (audi-review PR #7,
+    # finding 2).
+    response = _submit(client, team_member["id"], "key-1", reps=2**31)
+    assert response.status_code == 422
+
+
+def test_created_at_has_an_explicit_utc_offset(client, team_member):
+    # Regression test: SQLite strips tzinfo from DateTime values on
+    # round-trip, so a response could come back as a naive timestamp a
+    # client might misread as local time (audi-review PR #7, finding 4).
+    response = _submit(client, team_member["id"], "key-1", reps=10)
+    assert response.status_code == 201
+    created_at = response.json()["created_at"]
+    parsed = datetime.fromisoformat(created_at)
+    assert parsed.tzinfo is not None
+    assert parsed.utcoffset() == timedelta(0)

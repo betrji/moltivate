@@ -52,6 +52,7 @@
       "$ref": "#/$defs/SessionSource"
     },
     "reps": {
+      "maximum": 2147483647,
       "minimum": 0,
       "title": "Reps",
       "type": "integer"
