@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#163e31">
+  <title>Commitment Stakes · Moltivate demo</title>
+  <link rel="icon" href="./assets/favicon.svg">
+  <link rel="stylesheet" href="./fonts.css">
+  <link rel="stylesheet" href="./commitment.css">
+  <script type="module" src="./commitment.js"></script>
+</head>
+<body>
+  <main>
+    <header><a href="./index.html" class="brand">moltivate<span>●</span></a><span class="badge">Browser demo</span></header>
+    <a class="back" href="./index.html">← Mission & download</a>
+    <p class="eyebrow">SHOW UP FOR YOUR CREW</p>
+    <h1>Commitment<br><em>Stakes.</em></h1>
+    <p class="intro">Put your money where your muscles are.</p>
+    <div class="notice"><strong id="mode-label">Fixture mode · simulated data</strong><p>No verified workouts, funded stakes or payouts. Camera counting is still planned.</p></div>
+    <section class="challenge" aria-labelledby="challenge-title">
+      <div class="section-top"><span class="eyebrow">THE COMMITMENT</span><span class="badge">Off-chain draft</span></div>
+      <h2 id="challenge-title">The show-up club</h2>
+      <p id="challenge-description">Loading challenge…</p>
+      <p class="small">No deposit or settlement is available in this demo.</p>
+    </section>
+    <section aria-labelledby="score-title">
+      <div class="section-top"><h2 id="score-title">Crew progress</h2><button id="refresh" type="button">Refresh</button></div>
+      <p id="board-status" role="status" aria-live="polite"></p>
+      <div id="teams" aria-busy="true"></div>
+    </section>
+    <section class="session" aria-labelledby="session-title">
+      <p class="eyebrow">ONE SMALL COMMITMENT</p>
+      <h2 id="session-title">Try a fixture session</h2>
+      <p>A fixed sample of <strong>10 reps</strong>. Simulated demo input, never camera evidence. No manual workout counter.</p>
+      <p id="submission-target" class="small">Sample member: Alex · Early Birds</p>
+      <button id="submit" class="primary" type="button" disabled>Submit 10 simulated reps</button>
+      <button id="retry" class="primary" type="button" hidden>Retry same submission</button>
+      <p id="session-status" role="status" aria-live="polite">Loading demo…</p>
+    </section>
+    <details>
+      <summary>Development connection</summary>
+      <p>Fixtures run locally in this tab. API mode sends the same simulated input to an existing development draft; acceptance is not verification. No credentials needed or stored.</p>
+      <form id="connection">
+        <label>Data source<select name="mode"><option value="fixture">Local fixtures (simulated)</option><option value="api">Development API</option></select></label>
+        <label>API base URL or same-origin prefix<input name="base" value="/api" required></label>
+        <label>Challenge ID<input name="challenge" placeholder="Existing challenge UUID"></label>
+        <label>Submission team-member ID<input name="member" placeholder="Existing team-member UUID"></label>
+        <button type="submit">Apply connection</button>
+      </form>
+      <p class="small">PR #7 has no roster lookup, auth or CORS configuration. Supply existing development IDs. Cross-origin access requires backend coordination; this page never silently falls back to fixtures.</p>
+      <p id="connection-status" role="status"></p>
+    </details>
+    <footer><span>Stay Moltivated.</span><p>Disposable browser preview. Native platform choice remains open. Camera/CV, wallet, devnet settlement and the full demo gate are not implemented here.</p></footer>
+  </main>
+</body>
+</html>
