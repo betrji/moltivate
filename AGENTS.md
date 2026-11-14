@@ -53,6 +53,13 @@ Validate wallet and camera behavior on physical devices. Handle Android and iOS 
 
 ## Implementation workflow
 
+Keep Anchor source as ordinary tracked files under `programs/commitment-stakes/`.
+Disable nested Git initialization when scaffolding. Never stage `.isolated/`,
+recovery patches/bundles, build output, validator ledgers, wallets or keypairs.
+Review `git diff --cached --summary` for mode 160000 before publishing: a gitlink
+can fail Actions checkout before the repository guard can run. `npm run check`
+rejects tracked gitlinks and prohibited paths; this is not a secret content scanner.
+
 1. Inspect the current files, repository instructions, and existing conventions before editing. Do not assume the proposed directory layout already exists.
 2. Choose the smallest complete increment that advances the core loop: connect, join/deposit, record, verify, score, settle, claim.
 3. State reasonable implementation assumptions and proceed with routine reversible work. Ask only when an unresolved product decision materially changes behavior or financial rules.

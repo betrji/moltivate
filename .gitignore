@@ -9,3 +9,16 @@ node_modules/
 *-keypair.json
 playwright-report/
 test-results/
+
+# Local recovery/checkouts and Rust/Anchor output are never project source.
+/.isolated/
+target/
+.anchor/
+test-ledger/
+wallets/
+keypairs/
+secrets/
+*.pem
+id.json
+*.patch
+*.bundle

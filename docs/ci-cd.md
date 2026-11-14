@@ -33,6 +33,16 @@ Open http://127.0.0.1:5173/. `PORT` and `BASE_PATH` can customize the local/CI p
 
 ## Workflow guarantees
 
+`npm run check` also checks the Git index for gitlinks, nested checkout paths,
+recovery patches/bundles, generated output and known credential paths.
+`node --test tests/repository.test.js` exercises the path guard. It does not scan
+file contents for secrets. Review the staged summary before publishing because a
+gitlink may fail checkout before CI can execute the guard.
+
+The recovered Anchor foundation is under `programs/commitment-stakes/`.
+Demo CI tests the browser frontend and repository layout, not Rust compilation or
+financial correctness. See its README for the missing MVP and toolchain gates.
+
 - The build artifact is uploaded only after all checks pass. It is named with the source commit and run attempt, and retained for 30 days.
 - Test reports and failure traces are retained for 14 days, including failed runs.
 - Pull requests never deploy and have read-only repository permissions. The workflow does not use `pull_request_target`.
