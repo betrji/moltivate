@@ -1,0 +1,86 @@
+{
+  "$defs": {
+    "LivenessResult": {
+      "description": "Self-reported placeholder until a real liveness/verification worker\nexists (see architecture.md section 8). A client-reported `passed` is\nnever treated as proof of a completed workout.",
+      "enum": [
+        "not_run",
+        "pass",
+        "fail"
+      ],
+      "title": "LivenessResult",
+      "type": "string"
+    },
+    "SessionSource": {
+      "enum": [
+        "browser",
+        "camera_upload"
+      ],
+      "title": "SessionSource",
+      "type": "string"
+    },
+    "SessionStatus": {
+      "enum": [
+        "accepted",
+        "rejected"
+      ],
+      "title": "SessionStatus",
+      "type": "string"
+    },
+    "TrustLevel": {
+      "description": "Server-derived from `SessionSource`; never accepted from a client.",
+      "enum": [
+        "low",
+        "unverified"
+      ],
+      "title": "TrustLevel",
+      "type": "string"
+    }
+  },
+  "description": "Shared contract for a submitted workout session.",
+  "properties": {
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "team_member_id": {
+      "format": "uuid",
+      "title": "Team Member Id",
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/SessionSource"
+    },
+    "reps": {
+      "minimum": 0,
+      "title": "Reps",
+      "type": "integer"
+    },
+    "trust_level": {
+      "$ref": "#/$defs/TrustLevel"
+    },
+    "liveness_result": {
+      "$ref": "#/$defs/LivenessResult"
+    },
+    "status": {
+      "$ref": "#/$defs/SessionStatus"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "team_member_id",
+    "source",
+    "reps",
+    "trust_level",
+    "liveness_result",
+    "status",
+    "created_at"
+  ],
+  "title": "WorkoutSessionContract",
+  "type": "object"
+}
