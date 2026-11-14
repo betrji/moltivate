@@ -1,0 +1,46 @@
+{
+  "ref": "63d0011fe17f77b5b5fc87563763f93efeda86ff",
+  "patchSha256": "13fb4c8b8e33df13029afa8484ba9caaa445a6eca08e8a181b425302eebb4aea",
+  "files": [
+    {
+      "path": "programs/commitment-stakes/.gitignore",
+      "sha256": "51d9f1e0f3ce798c6e47be65639aea3fc2a6d3ffbbefd43ccd883f76a8cb0f62"
+    },
+    {
+      "path": "programs/commitment-stakes/Cargo.toml",
+      "sha256": "231bbe186d6919a9eb2a326f0935c17f26a16181cf17fe9c3297c8e0a1cb50ea"
+    },
+    {
+      "path": "programs/commitment-stakes/README.md",
+      "sha256": "f62c5f9e1cfa428a32eea1d4ff8bed6e6c2e74b4b25c05e1ba93905af9342849"
+    },
+    {
+      "path": "programs/commitment-stakes/docs/account-contract.md",
+      "sha256": "38938c19ed0c0662f5a10debdd1f0c893eacd86a85a7d43a42d2434c86fecfc0"
+    },
+    {
+      "path": "programs/commitment-stakes/docs/chert-capability.md",
+      "sha256": "20d0df64df94319507d8fac90b5679cf94571a174780bbf35a1cdf12d883b220"
+    },
+    {
+      "path": "programs/commitment-stakes/programs/commitment-stakes/Cargo.toml",
+      "sha256": "58d453bfe9a23fa2c33fe5b59a84cb9a37e78b3d49fff68449e9c1dee719aa14"
+    },
+    {
+      "path": "programs/commitment-stakes/programs/commitment-stakes/src/lib.rs",
+      "sha256": "7f263441ca57f8b76e6d6952623b4a5ccd652b470cfe53c8d19c4c410461865f"
+    },
+    {
+      "path": "programs/commitment-stakes/programs/commitment-stakes/src/math.rs",
+      "sha256": "0c2ab6babf82ead8e15a45ac3494fb80647e9154bf7a126d4a75b3e8e4dcbf1b"
+    },
+    {
+      "path": "scripts/check-repository.mjs",
+      "sha256": "b08721405f1f17f7eb8c54f510e98e3fe117446e9a1ba0658a0422531a09c4a5"
+    },
+    {
+      "path": "tests/repository.test.js",
+      "sha256": "4e4f708d9c9b8c3d44339f89ea008f02e6ee5adf8f7dfd28d283a03597272ff6"
+    }
+  ]
+}
